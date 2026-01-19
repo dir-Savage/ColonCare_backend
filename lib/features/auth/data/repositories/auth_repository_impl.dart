@@ -1,7 +1,7 @@
+import 'package:coloncare/features/auth/data/datasources/auth_local_data_source.dart';
+import 'package:coloncare/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:coloncare/features/auth/domain/entities/user_en.dart';
-import '../../domain/repositories/auth_repository.dart';
-import '../datasources/auth_local_data_source.dart';
-import '../datasources/auth_remote_data_source.dart';
+import 'package:coloncare/features/auth/domain/repositories/auth_repository.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
@@ -22,7 +22,7 @@ class AuthRepositoryImpl implements AuthRepository {
         return user;
       }
       return await localDataSource.getCachedUser();
-    } catch (e) {
+    } catch (_) {
       return await localDataSource.getCachedUser();
     }
   }
@@ -38,7 +38,6 @@ class AuthRepositoryImpl implements AuthRepository {
       password: password,
       fullName: fullName,
     );
-
     final user = userModel.toEntity();
     await localDataSource.cacheUser(user);
     return user;
@@ -53,7 +52,6 @@ class AuthRepositoryImpl implements AuthRepository {
       email: email,
       password: password,
     );
-
     final user = userModel.toEntity();
     await localDataSource.cacheUser(user);
     return user;
@@ -73,5 +71,18 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Stream<User?> authStateChanges() {
     return remoteDataSource.authStateChanges();
+  }
+
+  @override
+  Future<void> updateEmail(String newEmail) async {
+    // 1. Update in Firebase Auth + Firestore
+    await remoteDataSource.updateUserEmail(newEmail);
+
+    // 2. Update cached entity (immutable → use copyWith)
+    final currentUser = await getCurrentUser();
+    if (currentUser != null) {
+      final updatedUser = currentUser.copyWith(email: newEmail);
+      await localDataSource.cacheUser(updatedUser);
+    }
   }
 }

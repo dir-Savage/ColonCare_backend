@@ -1,11 +1,11 @@
-import 'package:coloncare/features/auth/presentation/blocs/auth_bloc/auth_bloc.dart';
+import 'dart:ui';
 import 'package:coloncare/features/auth/presentation/blocs/auth_bloc/auth_state.dart';
-import 'package:coloncare/features/auth/presentation/blocs/auth_form_bloc/auth_form_bloc.dart';
-import 'package:coloncare/features/auth/presentation/widgets/register_form.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
+import '../blocs/auth_bloc/auth_bloc.dart';
+import '../widgets/register_form.dart';
 import '../../../../core/navigation/app_router.dart';
 
 class RegisterPage extends StatelessWidget {
@@ -21,28 +21,110 @@ class RegisterPage extends StatelessWidget {
                 (route) => false,
           );
         } else if (state is AuthError) {
-          // Run after frame is built to avoid null context
           SchedulerBinding.instance.addPostFrameCallback((_) {
             if (Get.context != null) {
               Get.snackbar(
                 'Registration Failed',
                 state.message,
                 snackPosition: SnackPosition.BOTTOM,
-                backgroundColor: Colors.red,
+                backgroundColor: Colors.redAccent,
                 colorText: Colors.white,
-                duration: const Duration(seconds: 4),
-                margin: const EdgeInsets.all(10),
-                borderRadius: 8,
+                duration: const Duration(seconds: 5),
+                margin: const EdgeInsets.all(12),
+                borderRadius: 12,
               );
             }
           });
         }
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Register'),
+        extendBodyBehindAppBar: true,
+        body: Stack(
+          children: [
+            Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF0D47A1), Color(0xFF1976D2), Color(0xFF42A5F5)],
+                ),
+              ),
+            ),
+            Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 480),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 50),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(28),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                          child: Container(
+                            padding: const EdgeInsets.all(32),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.14),
+                              borderRadius: BorderRadius.circular(28),
+                              border: Border.all(color: Colors.white.withOpacity(0.20)),
+                            ),
+                            child: const Icon(
+                              Icons.person_add_rounded,
+                              size: 72,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                      const Text(
+                        'Join Us',
+                        style: TextStyle(
+                          fontSize: 34,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Create your account to get started',
+                        style: TextStyle(
+                          fontSize: 16.5,
+                          color: Colors.white.withOpacity(0.82),
+                        ),
+                      ),
+                      const SizedBox(height: 48),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(28),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(28),
+                              border: Border.all(color: Colors.white.withOpacity(0.18)),
+                            ),
+                            padding: const EdgeInsets.fromLTRB(28, 36, 28, 40),
+                            child: const _RegisterContent(),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 36),
+                      Text(
+                        'Your data stays private',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.white.withOpacity(0.58),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
-        body: const _RegisterContent(),
       ),
     );
   }
@@ -53,36 +135,10 @@ class _RegisterContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        children: [
-          const SizedBox(height: 40),
-          const Icon(Icons.person_add, size: 80, color: Colors.blue),
-          const SizedBox(height: 20),
-          Text(
-            'Create Account',
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).primaryColor,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            'Sign up to get started',
-            style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-          ),
-          const SizedBox(height: 40),
-          Expanded(
-            child: BlocBuilder<AuthBloc, AuthState>(
-              builder: (context, authState) {
-                return RegisterForm(isLoading: authState is AuthLoading);
-              },
-            ),
-          ),
-        ],
-      ),
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, authState) {
+        return RegisterForm(isLoading: authState is AuthLoading);
+      },
     );
   }
 }

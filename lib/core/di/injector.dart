@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:coloncare/core/services/app_session_service.dart';
+import 'package:coloncare/features/auth/domain/usecases/update_profile_usecase.dart';
 import 'package:coloncare/features/bmi/data/datasources/bmi_local_data_source.dart';
 import 'package:coloncare/features/bmi/data/repositories/bmi_repository_impl.dart';
 import 'package:coloncare/features/bmi/domain/repositories/bmi_repository.dart';
@@ -306,6 +307,7 @@ Future<void> _healthCheckInject() async {
 Future<void> _profileInject() async {
   getIt.registerFactory<ProfileBloc>(
         () => ProfileBloc(
+      updateEmailUseCase: UpdateEmailUseCase(getIt<AuthRepository>()),
       firestore: getIt<FirebaseFirestore>(),
       auth: getIt<FirebaseAuth>(),
     ),

@@ -12,23 +12,17 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 
 abstract class PredictionRemoteDataSource {
-  /// Sends base64 image to ML API and returns prediction
   Future<PredictionResultModel> predictFromImage(File imageFile);
 
-  /// Reads file and returns base64 string (can be reused from predict if needed)
   Future<String> encodeImageToBase64(File imageFile);
 
-  /// Saves prediction + base64 image to Firestore
   Future<void> savePrediction({
     required String userId,
     required String base64Image,
     required PredictionResultModel result,
   });
-
-  /// Fetches all predictions for the current user (newest first)
   Future<List<PredictionHistoryEntryModel>> getPredictionHistory(String userId);
 
-  /// Deletes a prediction by its Firestore document ID
   Future<void> deletePrediction(String predictionId);
 }
 
@@ -38,7 +32,7 @@ class PredictionRemoteDataSourceImpl implements PredictionRemoteDataSource {
   final FirebaseAuth auth;
 
   static const String _apiBaseUrl =
-      "https://b4fbfb264efb.ngrok-free.app/predict";
+      "https://kitchen-cambridge-assistant-nsw.trycloudflare.com/predict";
 
   PredictionRemoteDataSourceImpl({
     required this.httpClient,

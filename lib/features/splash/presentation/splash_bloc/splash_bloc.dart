@@ -1,4 +1,3 @@
-// features/splash/presentation/splash_bloc/splash_bloc.dart
 import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:coloncare/features/auth/presentation/blocs/auth_bloc/auth_bloc.dart';
@@ -37,6 +36,7 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
     final completer = Completer<void>();
     bool hasResult = false;
 
+    _authSubscription?.cancel(); // Cancel any existing subscription
     _authSubscription = authBloc.stream.listen((authState) {
       if (!hasResult) {
         if (authState is Authenticated) {
@@ -59,14 +59,13 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
     // Set timeout
     await Future.any([
       completer.future,
-      Future.delayed(const Duration(seconds: 5)),
+      Future.delayed(const Duration(seconds: 5)).then((_) {
+        if (!hasResult) {
+          emit(SplashUnauthenticated());
+        }
+      }),
     ]);
 
     _authSubscription?.cancel();
-
-    // If timeout or no response, go to login
-    if (!hasResult) {
-      emit(SplashUnauthenticated());
-    }
   }
 }

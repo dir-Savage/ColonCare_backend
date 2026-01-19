@@ -8,8 +8,7 @@ import 'package:coloncare/features/auth/presentation/blocs/auth_form_bloc/auth_f
 import 'package:coloncare/features/auth/presentation/blocs/auth_form_bloc/auth_form_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_navigation/get_navigation.dart';
+import 'package:get/get.dart';
 
 class RegisterForm extends StatelessWidget {
   final bool isLoading;
@@ -21,83 +20,128 @@ class RegisterForm extends StatelessWidget {
     final passwordController = TextEditingController();
     final fullNameController = TextEditingController();
 
-    return BlocBuilder<AuthFormBloc, AuthFormState>(
-      builder: (context, formState) {
-        return SingleChildScrollView(
-          child: Form(
-            child: Column(
-              children: [
-                AppTextField(
-                  controller: fullNameController,
-                  label: 'Full Name',
-                  hint: 'Enter your full name',
-                  validator: Validators.validateFullName,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        AppTextField(
+          controller: fullNameController,
+          label: 'Full Name',
+          hint: 'John Doe',
+          validator: Validators.validateFullName,
+        ),
+        const SizedBox(height: 28),
+
+        AppTextField(
+          controller: emailController,
+          label: 'Email',
+          hint: 'your.email@example.com',
+          keyboardType: TextInputType.emailAddress,
+          validator: Validators.validateEmail,
+        ),
+        const SizedBox(height: 28),
+
+        AppTextField(
+          controller: passwordController,
+          label: 'Password',
+          hint: 'Minimum 6 characters',
+          obscureText: true,
+          validator: Validators.validatePassword,
+        ),
+        const SizedBox(height: 40),
+
+        BlocBuilder<AuthBloc, AuthState>(
+          builder: (context, authState) {
+            final loading = authState is AuthLoading || isLoading;
+
+            return Container(
+              height: 58,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Colors.blueAccent, Colors.blue],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
                 ),
-                const SizedBox(height: 20),
-                AppTextField(
-                  controller: emailController,
-                  label: 'Email',
-                  hint: 'Enter your email',
-                  keyboardType: TextInputType.emailAddress,
-                  validator: Validators.validateEmail,
-                ),
-                const SizedBox(height: 20),
-                AppTextField(
-                  controller: passwordController,
-                  label: 'Password',
-                  hint: 'Enter your password (min. 6 characters)',
-                  obscureText: true,
-                  validator: Validators.validatePassword,
-                ),
-                const SizedBox(height: 30),
-                BlocBuilder<AuthBloc, AuthState>(
-                  builder: (context, authState) {
-                    return AppButton(
-                      text: 'Create Account',
-                      onPressed: () {
-                        if (emailController.text.isEmpty ||
-                            passwordController.text.isEmpty ||
-                            fullNameController.text.isEmpty) {
-                          // Local validation snackbar (optional)
-                          Get.snackbar(
-                            'Error',
-                            'Please fill all fields',
-                            snackPosition: SnackPosition.BOTTOM,
-                            backgroundColor: Colors.orange,
-                            colorText: Colors.white,
-                          );
-                          return;
-                        }
-                        context.read<AuthBloc>().add(
-                          RegisterRequested(
-                            email: emailController.text,
-                            password: passwordController.text,
-                            fullName: fullNameController.text,
-                          ),
-                        );
-                      },
-                      isLoading: authState is AuthLoading || isLoading,
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.blue.withOpacity(0.40),
+                    blurRadius: 16,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(30),
+                  onTap: loading
+                      ? null
+                      : () {
+                    if (emailController.text.trim().isEmpty ||
+                        passwordController.text.isEmpty ||
+                        fullNameController.text.trim().isEmpty) {
+                      Get.snackbar(
+                        'Missing Fields',
+                        'Please complete all fields',
+                        backgroundColor: Colors.orangeAccent,
+                        colorText: Colors.white,
+                      );
+                      return;
+                    }
+                    context.read<AuthBloc>().add(
+                      RegisterRequested(
+                        email: emailController.text.trim(),
+                        password: passwordController.text,
+                        fullName: fullNameController.text.trim(),
+                      ),
                     );
                   },
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text('Already have an account?'),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pushReplacementNamed(context, '/login');
-                      },
-                      child: const Text('Login'),
+                  child: Center(
+                    child: loading
+                        ? const SizedBox(
+                      width: 26,
+                      height: 26,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.8,
+                        valueColor: AlwaysStoppedAnimation(Colors.white),
+                      ),
+                    )
+                        : const Text(
+                      'Create Account',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.3,
+                      ),
                     ),
-                  ],
+                  ),
                 ),
-              ],
+              ),
+            );
+          },
+        ),
+
+        const SizedBox(height: 32),
+
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Already have an account? ',
+              style: TextStyle(color: Colors.white.withOpacity(0.88), fontSize: 15.2),
             ),
-          ),
-        );
-      },
+            TextButton(
+              onPressed: () => Navigator.pushReplacementNamed(context, '/login'),
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFFBBDEFB),
+                textStyle: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.w700),
+              ),
+              child: const Text('Sign In'),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

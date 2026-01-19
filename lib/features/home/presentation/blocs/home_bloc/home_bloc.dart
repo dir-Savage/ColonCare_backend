@@ -3,7 +3,6 @@ import 'package:bloc/bloc.dart';
 import 'package:coloncare/features/auth/presentation/blocs/auth_bloc/auth_bloc.dart';
 import 'package:coloncare/features/auth/presentation/blocs/auth_bloc/auth_event.dart';
 import 'package:coloncare/features/auth/presentation/blocs/auth_bloc/auth_state.dart';
-import 'package:equatable/equatable.dart';
 import 'home_event.dart';
 import 'home_state.dart';
 
@@ -16,7 +15,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<HomeDataRefreshed>(_onHomeDataRefreshed);
     on<HomeLogoutRequested>(_onHomeLogoutRequested);
 
-    // Listen to auth state changes
+    _authSubscription?.cancel();
     _authSubscription = authBloc.stream.listen((authState) {
       if (authState is Authenticated) {
         add(HomeDataRequested(user: authState.user));
@@ -62,7 +61,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
   @override
   Future<void> close() {
-    _authSubscription?.cancel();
+    _authSubscription?.cancel(); // Ensure subscription is canceled
     return super.close();
   }
 }

@@ -5,7 +5,7 @@ class User extends Equatable {
   final String avatarUrl = 'https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=Avery';
   final String email;
   final String fullName;
-  final String? doctorPhoneNumber;  // NEW FIELD
+  final String? doctorPhoneNumber;
 
   const User({
     required this.uid,
@@ -14,10 +14,6 @@ class User extends Equatable {
     this.doctorPhoneNumber,
   });
 
-  @override
-  List<Object> get props => [uid, email, fullName, doctorPhoneNumber ?? ''];
-
-  // Factory constructor for empty user
   factory User.empty() => const User(
     uid: '',
     email: '',
@@ -28,7 +24,6 @@ class User extends Equatable {
   bool get isEmpty => uid.isEmpty && email.isEmpty && fullName.isEmpty;
   bool get isNotEmpty => !isEmpty;
 
-  // Copy with method
   User copyWith({
     String? uid,
     String? email,
@@ -42,4 +37,7 @@ class User extends Equatable {
       doctorPhoneNumber: doctorPhoneNumber ?? this.doctorPhoneNumber,
     );
   }
+
+  @override
+  List<Object?> get props => [uid, email, fullName, doctorPhoneNumber];
 }

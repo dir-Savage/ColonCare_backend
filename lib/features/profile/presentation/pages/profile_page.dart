@@ -1,6 +1,8 @@
 import 'package:coloncare/core/di/injector.dart';
 import 'package:coloncare/core/utils/app_animations.dart';
 import 'package:coloncare/features/auth/domain/entities/user_en.dart';
+import 'package:coloncare/features/auth/presentation/blocs/auth_bloc/auth_bloc.dart';
+import 'package:coloncare/features/auth/presentation/blocs/auth_bloc/auth_event.dart';
 import 'package:coloncare/features/health_check/presentation/widgets/health_check_settings_widget.dart';
 import 'package:coloncare/features/profile/presentation/blocs/profile_bloc.dart';
 import 'package:coloncare/features/profile/presentation/pages/questions_settings_screen.dart';
@@ -20,7 +22,7 @@ class ProfilePage extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Profile'),
-          leading: Icon(Icons.person_3_outlined),
+          leading: const Icon(Icons.person_3_outlined),
         ),
         body: const _ProfilePageContent(),
       ),
@@ -132,6 +134,61 @@ class _ProfilePageContent extends StatelessWidget {
                 FadeInAnimation(
                   duration: const Duration(milliseconds: 400),
                   child: _buildAccountInfoSection(context, user),
+                ),
+                const SizedBox(height: 24),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.red.shade100),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.warning_amber_rounded, color: Colors.red.shade400),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          "Logging out , you may miss some important health notifications.",
+                          style: TextStyle(
+                            color: Colors.red.shade700,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                        ),
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Confirm Logout'),
+                              content: const Text('Are you sure you want to log out?'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: const Text('Cancel'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    context.read<AuthBloc>().add(LogoutRequested());
+                                  },
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: Colors.red,
+                                  ),
+                                  child: const Text('Logout'),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                        child: const Text('Logout', style: TextStyle(color: Colors.white)),
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 40),
               ],
@@ -417,9 +474,6 @@ class _ProfilePageContent extends StatelessWidget {
     );
   }
 
-
-
-
   Widget _buildHealthCheckSettings(BuildContext context, User user) {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -439,7 +493,7 @@ class _ProfilePageContent extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.health_and_safety, color: Colors.teal),
+              const Icon(Icons.health_and_safety, color: Colors.teal),
               const SizedBox(width: 10),
               const Text(
                 'Health Check Settings',
@@ -456,7 +510,7 @@ class _ProfilePageContent extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Colors.teal , Colors.teal.shade600],
+                  colors: [Colors.teal, Colors.teal.shade600],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -470,7 +524,7 @@ class _ProfilePageContent extends StatelessWidget {
                 ],
               ),
               child: ElevatedButton.icon(
-                onPressed: ()  {
+                onPressed: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -497,7 +551,8 @@ class _ProfilePageContent extends StatelessWidget {
                   'Configure Health Check Questions',
                   style: TextStyle(
                     fontSize: 14,
-                      color: Colors.white),
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
@@ -507,6 +562,8 @@ class _ProfilePageContent extends StatelessWidget {
     );
   }
 
+// UPDATE the profile page to include an edit button
+// In _buildAccountInfoSection method, add:
 
   Widget _buildAccountInfoSection(BuildContext context, User user) {
     return Container(
@@ -527,7 +584,7 @@ class _ProfilePageContent extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.settings_outlined, color: Colors.blueAccent),
+              Icon(Icons.settings_outlined, color: Colors.blue.shade600),
               const SizedBox(width: 10),
               const Text(
                 'Account Settings',
@@ -539,45 +596,14 @@ class _ProfilePageContent extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.blueAccent , Colors.blue.shade600],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+          ElevatedButton.icon(
+            onPressed: () => _showEditProfileDialog(context, user),
+            icon: const Icon(Icons.edit),
+            label: const Text('Edit Profile Information'),
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size(double.infinity, 50),
+              shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.15),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: ElevatedButton.icon(
-                onPressed: () => _showEditProfileDialog(context, user),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.transparent,
-                  shadowColor: Colors.transparent,
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                icon: Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.12),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.edit, color: Colors.white, size: 20),
-                ),
-                label: const Text(
-                  'Edit Profile Information',
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
-                ),
               ),
             ),
           ),
@@ -691,12 +717,12 @@ class _ProfilePageContent extends StatelessWidget {
       builder: (context) => _EditProfileDialog(
         user: user,
         onSave: (fullName, email, doctorPhone) {
+          // This should trigger the bloc event
           context.read<ProfileBloc>().add(ProfileUpdateRequested(
             fullName: fullName,
             email: email,
             doctorPhoneNumber: doctorPhone,
           ));
-          Navigator.pop(context);
         },
       ),
     );
@@ -859,6 +885,10 @@ class _DoctorPhoneDialogState extends State<_DoctorPhoneDialog> {
   }
 }
 
+
+// ADD THIS TO features/profile/presentation/pages/profile_page.dart
+// (Add this class at the end of the file)
+
 class _EditProfileDialog extends StatefulWidget {
   final User user;
   final Function(String?, String?, String?) onSave;
@@ -875,7 +905,7 @@ class _EditProfileDialog extends StatefulWidget {
 class _EditProfileDialogState extends State<_EditProfileDialog> {
   late TextEditingController _nameController;
   late TextEditingController _emailController;
-  late TextEditingController _phoneController;
+  late TextEditingController _doctorPhoneController;
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -883,14 +913,14 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
     super.initState();
     _nameController = TextEditingController(text: widget.user.fullName);
     _emailController = TextEditingController(text: widget.user.email);
-    _phoneController = TextEditingController(text: widget.user.doctorPhoneNumber ?? '');
+    _doctorPhoneController = TextEditingController(text: widget.user.doctorPhoneNumber ?? '');
   }
 
   @override
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
-    _phoneController.dispose();
+    _doctorPhoneController.dispose();
     super.dispose();
   }
 
@@ -915,6 +945,16 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
     return null;
   }
 
+  String? _validatePhone(String? value) {
+    if (value != null && value.trim().isNotEmpty) {
+      final cleaned = value.trim().replaceAll(RegExp(r'[^\d+]'), '');
+      if (cleaned.length < 10) {
+        return 'Please enter a valid phone number (at least 10 digits)';
+      }
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -928,7 +968,7 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
               TextFormField(
                 controller: _nameController,
                 decoration: const InputDecoration(
-                  labelText: 'Full Name',
+                  labelText: 'Full Name *',
                   prefixIcon: Icon(Icons.person),
                   border: OutlineInputBorder(),
                 ),
@@ -938,7 +978,7 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
               TextFormField(
                 controller: _emailController,
                 decoration: const InputDecoration(
-                  labelText: 'Email Address',
+                  labelText: 'Email Address *',
                   prefixIcon: Icon(Icons.email),
                   border: OutlineInputBorder(),
                 ),
@@ -947,14 +987,24 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
               ),
               const SizedBox(height: 16),
               TextFormField(
-                controller: _phoneController,
+                controller: _doctorPhoneController,
                 decoration: const InputDecoration(
-                  labelText: 'Doctor Phone Number (Optional)',
+                  labelText: 'Doctor Phone Number',
                   hintText: '+1 (555) 123-4567',
                   prefixIcon: Icon(Icons.phone),
                   border: OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.phone,
+                validator: _validatePhone,
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                '* Required fields',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey,
+                  fontStyle: FontStyle.italic,
+                ),
               ),
             ],
           ),
@@ -971,8 +1021,9 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
               widget.onSave(
                 _nameController.text.trim(),
                 _emailController.text.trim(),
-                _phoneController.text.trim().isEmpty ? null : _phoneController.text.trim(),
+                _doctorPhoneController.text.trim().isEmpty ? null : _doctorPhoneController.text.trim(),
               );
+              Navigator.pop(context);
             }
           },
           child: const Text('Save Changes'),

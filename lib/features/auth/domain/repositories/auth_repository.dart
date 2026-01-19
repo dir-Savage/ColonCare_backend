@@ -25,4 +25,6 @@ abstract class AuthRepository {
 
   // Listen to auth state changes
   Stream<User?> authStateChanges();
+
+  Future<void> updateEmail(String newEmail);
 }

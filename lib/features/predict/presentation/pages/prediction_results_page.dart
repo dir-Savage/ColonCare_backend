@@ -153,6 +153,7 @@ class _PredictionResultsPageState extends State<PredictionResultsPage>
                     delay: const Duration(milliseconds: 300),
                     child: _buildDetailsCard(result),
                   ),
+                SizedBox(height: 20,),
 
                 // OOD Warning
                 if (result.isOutOfDistribution)

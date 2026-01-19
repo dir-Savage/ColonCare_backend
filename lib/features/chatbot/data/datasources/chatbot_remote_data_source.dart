@@ -11,7 +11,7 @@ abstract class ChatbotRemoteDataSource {
 class ChatbotRemoteDataSourceImpl implements ChatbotRemoteDataSource {
   final http.Client httpClient;
 
-  static const String _apiBaseUrl = 'https://1b41e9a87d1c.ngrok-free.app/chat';
+  static const String _apiBaseUrl = 'https://kitchen-cambridge-assistant-nsw.trycloudflare.com/chat';
 
   ChatbotRemoteDataSourceImpl({
     required this.httpClient,

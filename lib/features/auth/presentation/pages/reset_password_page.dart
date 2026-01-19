@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:coloncare/features/auth/presentation/blocs/auth_bloc/auth_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,9 +16,12 @@ class ResetPasswordPage extends StatelessWidget {
       listener: (context, state) {
         if (state is PasswordResetSent) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Password reset email sent'),
-              backgroundColor: Colors.green,
+            SnackBar(
+              content: const Text('Password reset email sent! Check your inbox.'),
+              backgroundColor: Colors.greenAccent.shade700,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
           );
           Navigator.of(context).pop();
@@ -24,56 +29,131 @@ class ResetPasswordPage extends StatelessWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.message),
-              backgroundColor: Colors.red,
+              backgroundColor: Colors.redAccent,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
           );
         }
       },
       child: Scaffold(
+        extendBodyBehindAppBar: true,
         appBar: AppBar(
-          title: const Text('Reset Password'),
-        ),
-        body: const _ResetPasswordContent(),
-      ),
-    );
-  }
-}
-
-class _ResetPasswordContent extends StatelessWidget {
-  const _ResetPasswordContent();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.lock_reset,
-            size: 80,
-            color: Colors.blue,
-          ),
-          const SizedBox(height: 20),
-          const Text(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          iconTheme: const IconThemeData(color: Colors.white),
+          title: const Text(
             'Reset Password',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(color: Colors.white),
           ),
-          const SizedBox(height: 10),
-          const Text(
-            'Enter your email address and we will send you a password reset link.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey,
+        ),
+        body: Stack(
+          children: [
+            // Background gradient
+            Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0xFF0D47A1),
+                    Color(0xFF1565C0),
+                    Color(0xFF1976D2),
+                  ],
+                ),
+              ),
             ),
-          ),
-          const SizedBox(height: 40),
-          const Expanded(child: ResetPasswordForm()),
-        ],
+
+            SafeArea(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 480),
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Header icon with glass effect
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(28),
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                            child: Container(
+                              padding: const EdgeInsets.all(32),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.14),
+                                borderRadius: BorderRadius.circular(28),
+                                border: Border.all(color: Colors.white.withOpacity(0.20)),
+                              ),
+                              child: const Icon(
+                                Icons.lock_reset_rounded,
+                                size: 72,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 32),
+
+                        const Text(
+                          'Forgot your password?',
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        Text(
+                          "No worries — we'll send you a reset link",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 16.5,
+                            color: Colors.white.withOpacity(0.82),
+                          ),
+                        ),
+
+                        const SizedBox(height: 48),
+
+                        // Glass card containing the form
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(28),
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.12),
+                                borderRadius: BorderRadius.circular(28),
+                                border: Border.all(color: Colors.white.withOpacity(0.18)),
+                              ),
+                              padding: const EdgeInsets.fromLTRB(32, 40, 32, 44),
+                              child: const ResetPasswordForm(),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        Text(
+                          'Check your spam folder if you don’t see the email',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.white.withOpacity(0.58),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
