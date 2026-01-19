@@ -1,0 +1,67 @@
+{
+  "project_info": {
+    "project_number": "173639769725",
+    "project_id": "colon-care-190a8",
+    "storage_bucket": "colon-care-190a8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:173639769725:android:600f3bd3ef487312579b14",
+        "android_client_info": {
+          "package_name": "com.colonCareAppHealth.colon_care"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDnCP88VQnyTIhkCIOU2FLsikEBA0z1sFc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:173639769725:android:3e346ca4c71d6be4579b14",
+        "android_client_info": {
+          "package_name": "com.colonCareappcolon.coloncare"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDnCP88VQnyTIhkCIOU2FLsikEBA0z1sFc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:173639769725:android:9be7762d507e955b579b14",
+        "android_client_info": {
+          "package_name": "com.coloncareCApp.coloncare"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDnCP88VQnyTIhkCIOU2FLsikEBA0z1sFc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
