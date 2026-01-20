@@ -1,3 +1,4 @@
+// FILE: auth/data/datasources/auth_local_data_source.dart
 import 'dart:convert';
 import 'package:coloncare/features/auth/domain/entities/user_en.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,7 +19,7 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
       'uid': user.uid,
       'email': user.email,
       'fullName': user.fullName,
-      'doctorPhoneNumber': user.doctorPhoneNumber,  // NEW FIELD
+      // Note: doctorPhoneNumber is now stored separately in StorageService
     });
     await prefs.setString(_userKey, userJson);
   }
@@ -36,7 +37,7 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
         uid: userMap['uid'] as String,
         email: userMap['email'] as String,
         fullName: userMap['fullName'] as String,
-        doctorPhoneNumber: userMap['doctorPhoneNumber'] as String?,
+        doctorPhoneNumber: null, // Will be fetched separately from StorageService
       );
     } catch (e) {
       return null;

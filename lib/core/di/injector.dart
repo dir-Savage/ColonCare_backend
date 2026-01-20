@@ -307,7 +307,6 @@ Future<void> _healthCheckInject() async {
 Future<void> _profileInject() async {
   getIt.registerFactory<ProfileBloc>(
         () => ProfileBloc(
-      updateEmailUseCase: UpdateEmailUseCase(getIt<AuthRepository>()),
       firestore: getIt<FirebaseFirestore>(),
       auth: getIt<FirebaseAuth>(),
     ),

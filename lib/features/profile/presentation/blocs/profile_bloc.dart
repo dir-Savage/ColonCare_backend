@@ -1,11 +1,10 @@
-import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:coloncare/core/failures/failure.dart';
+import 'package:coloncare/core/utils/doctor_phone_helper.dart';
 import 'package:coloncare/features/auth/data/models/user_model.dart';
 import 'package:coloncare/features/auth/domain/entities/user_en.dart';
-import 'package:coloncare/features/auth/domain/usecases/update_profile_usecase.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide User;
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 part 'profile_event.dart';
 part 'profile_state.dart';
@@ -13,12 +12,10 @@ part 'profile_state.dart';
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
-  final UpdateEmailUseCase updateEmailUseCase; // Add this
 
   ProfileBloc({
     required FirebaseFirestore firestore,
     required FirebaseAuth auth,
-    required this.updateEmailUseCase,
   })  : _firestore = firestore,
         _auth = auth,
         super(ProfileInitial()) {
@@ -46,7 +43,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       }
 
       final userModel = UserModel.fromFirestore(userDoc.data()!);
-      emit(ProfileLoaded(user: userModel.toEntity()));
+      // Load doctor phone from storage
+      final userWithPhone = await User.withDoctorPhone(userModel.toEntity());
+      emit(ProfileLoaded(user: userWithPhone));
     } catch (e) {
       emit(ProfileError('Failed to load profile: $e'));
     }
@@ -62,19 +61,28 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     emit(ProfileUpdating(user: currentState.user!));
 
     try {
-      final user = _auth.currentUser;
-      if (user == null) {
-        emit(ProfileError('User not authenticated', user: currentState.user));
+      final phoneNumber = event.phoneNumber.trim();
+
+      // Validate phone number
+      if (!_isValidPhone(phoneNumber)) {
+        emit(ProfileError('Invalid phone number format', user: currentState.user));
         return;
       }
 
-      await _firestore.collection('users').doc(user.uid).update({
-        'doctorPhoneNumber': event.phoneNumber.trim(),
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
+      // Save to local storage
+      await StorageService.saveDoctorPhone(phoneNumber);
+
+      // Optional: Save to Firestore as well
+      final user = _auth.currentUser;
+      if (user != null) {
+        await _firestore.collection('users').doc(user.uid).update({
+          'doctorPhoneNumber': phoneNumber,
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+      }
 
       final updatedUser = currentState.user!.copyWith(
-        doctorPhoneNumber: event.phoneNumber.trim(),
+        doctorPhoneNumber: phoneNumber,
       );
 
       emit(ProfileLoaded(user: updatedUser));
@@ -85,6 +93,12 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     } catch (e) {
       emit(ProfileError('Failed to update phone number: $e', user: currentState.user));
     }
+  }
+
+  bool _isValidPhone(String phone) {
+    // Basic phone validation
+    final phoneRegex = RegExp(r'^\+?[1-9]\d{1,14}$');
+    return phoneRegex.hasMatch(phone.replaceAll(RegExp(r'[^\d+]'), ''));
   }
 
   Future<void> _onProfileUpdateRequested(
@@ -105,43 +119,35 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
       final updates = <String, dynamic>{};
 
-      // Check which fields need to be updated
       if (event.fullName != null && event.fullName!.trim().isNotEmpty) {
         updates['fullName'] = event.fullName!.trim();
       }
 
-      if (event.email != null && event.email!.trim().isNotEmpty) {
-        // Update email in Firebase Auth first
-        try {
-          await updateEmailUseCase(event.email!.trim());
-          updates['email'] = event.email!.trim();
-        } catch (e) {
-          emit(ProfileError(
-            'Failed to update email: $e. Please re-authenticate.',
-            user: currentState.user,
-          ));
+      if (event.doctorPhoneNumber != null && event.doctorPhoneNumber!.trim().isNotEmpty) {
+        final phoneNumber = event.doctorPhoneNumber!.trim();
+
+        if (!_isValidPhone(phoneNumber)) {
+          emit(ProfileError('Invalid phone number format', user: currentState.user));
           return;
         }
+
+        // Save to local storage
+        await StorageService.saveDoctorPhone(phoneNumber);
+
+        updates['doctorPhoneNumber'] = phoneNumber;
       }
 
-      if (event.doctorPhoneNumber != null && event.doctorPhoneNumber!.trim().isNotEmpty) {
-        updates['doctorPhoneNumber'] = event.doctorPhoneNumber!.trim();
-      }
-
-      // Add timestamp for update
       updates['updatedAt'] = FieldValue.serverTimestamp();
 
-      // Update Firebase Firestore
-      await _firestore.collection('users').doc(user.uid).update(updates);
+      if (updates.isNotEmpty) {
+        await _firestore.collection('users').doc(user.uid).update(updates);
+      }
 
-      // Create updated user object
       final updatedUser = currentState.user!.copyWith(
         fullName: event.fullName?.trim() ?? currentState.user!.fullName,
-        email: event.email?.trim() ?? currentState.user!.email,
         doctorPhoneNumber: event.doctorPhoneNumber?.trim() ?? currentState.user!.doctorPhoneNumber,
       );
 
-      // Emit success states
       emit(ProfileLoaded(user: updatedUser));
       emit(ProfileUpdateSuccess(
         user: updatedUser,

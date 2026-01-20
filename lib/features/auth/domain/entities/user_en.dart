@@ -1,3 +1,4 @@
+import 'package:coloncare/core/utils/doctor_phone_helper.dart';
 import 'package:equatable/equatable.dart';
 
 class User extends Equatable {
@@ -36,6 +37,12 @@ class User extends Equatable {
       fullName: fullName ?? this.fullName,
       doctorPhoneNumber: doctorPhoneNumber ?? this.doctorPhoneNumber,
     );
+  }
+
+  // Load doctor phone number from storage
+  static Future<User> withDoctorPhone(User user) async {
+    final storedPhone = await StorageService.getDoctorPhoneNumber();
+    return user.copyWith(doctorPhoneNumber: storedPhone);
   }
 
   @override

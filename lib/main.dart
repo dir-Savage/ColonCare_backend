@@ -1,15 +1,12 @@
 import 'package:coloncare/core/navigation/navigation_service.dart';
 import 'package:coloncare/core/themes/app_theme.dart';
-import 'package:coloncare/features/home/presentation/pages/home_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'core/di/app_bloc_providers.dart';
 import 'core/di/injector.dart';
 import 'core/navigation/app_router.dart';
-
-import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_background/flutter_background.dart';
+import 'core/utils/doctor_phone_helper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,9 +22,33 @@ void main() async {
   if (hasPermissions) {
     await FlutterBackground.enableBackgroundExecution();
   }
+  StorageService();
+  // await checkAppStatus();
 
   runApp(const MyApp());
 }
+
+
+// Future<void> checkAppStatus() async {
+//   try {
+//     final doc = await FirebaseFirestore.instance
+//         .collection('config')
+//         .doc('app_status')
+//         .get();
+//
+//     final enabled = doc.data()?['enabled'] ?? false;
+//
+//     if (!enabled) {
+//       // اقفل التطبيق نهائي
+//       exit(0);
+//     }
+//   } catch (e) {
+//     // لو Firebase وقع أو العميل لعب
+//     exit(0);
+//   }
+// }
+
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
